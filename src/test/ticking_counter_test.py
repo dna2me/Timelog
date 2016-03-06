@@ -65,6 +65,7 @@ class TickingCounterTest(TestCase):
         self.assertEqual(0, actual)
         self.tickingCounter.resume()
         actual1 = self.tickingCounter.get_break_time()
+        self.assertNotEqual(0, actual1)
         self.assertAlmostEqual(1, actual1, 1)
         self.tickingCounter.suspend()
         actual2 = self.tickingCounter.get_break_time()
@@ -113,3 +114,42 @@ class TickingCounterTest(TestCase):
         self.assertAlmostEqual(0, actual3, 1)
         self.assertNotEqual(0, actual3)
 
+    def test_get_whole_period_time(self):
+        try:
+            self.tickingCounter.get_whole_period_time()
+            self.fail('Should throw exception.')
+        except Exception:
+            pass
+
+        self.tickingCounter.start()
+        self.tickingCounter.finish()
+        self.assertAlmostEqual(0, self.tickingCounter.get_whole_period_time(), 1)
+
+    def test_get_total_working_time(self):
+        # 43210
+        self.tickingCounter.time_record.append(123456789)
+        self.tickingCounter.time_record.append(123499999)
+
+        # 3
+        self.tickingCounter.break_record.append(123466666)
+        self.tickingCounter.break_record.append(123466669)
+
+        # 11
+        self.tickingCounter.break_record.append(123466679)
+        self.tickingCounter.break_record.append(123466690)
+
+        # 43210 - 3 - 11 = 43196
+        actual = self.tickingCounter.get_total_working_time()
+        self.assertEqual(43196, actual)
+
+    def test_show_elapsed_time(self):
+        actual = ticking_counter.show_elapsed_time(3611)
+        self.assertEqual(1, actual['hour'])
+        self.assertEqual(0, actual['minute'])
+        self.assertEqual(11, actual['second'])
+
+    def test_show_elapsed_time_tuple(self):
+        hours, minutes, seconds = ticking_counter.show_elapsed_time_tuple(7299)
+        self.assertEqual(2, hours)
+        self.assertEqual(1, minutes)
+        self.assertEqual(39, seconds)

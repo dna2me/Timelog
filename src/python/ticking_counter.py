@@ -12,6 +12,11 @@ class TickingCounter:
         self.time_record = []
 
     def start(self):
+        if len(self.time_record) != 0:
+            self.time_record = []
+            self.break_record = []
+            raise Exception('time_record & break_record restart.')
+
         self.time_record.append(time.time())
         return
 
@@ -35,7 +40,6 @@ class TickingCounter:
 
     def get_break_time(self):
         break_record_length = len(self.break_record)
-        result = 0
         if break_record_length % 2 == 0:
             result = self.count_break_time_last_break_record_is_resume(break_record_length)
         else:
@@ -56,3 +60,28 @@ class TickingCounter:
         var = self.time_record[1] - self.break_record[break_record_length - 1]
         sum_break_time += var
         return sum_break_time
+
+    def get_whole_period_time(self):
+        if len(self.time_record) != 2:
+            raise Exception('No start time or finish time record.s')
+        return self.time_record[1] - self.time_record[0]
+
+    def get_total_working_time(self):
+        whole_period = self.get_whole_period_time()
+        sum_of_suspend = self.get_break_time()
+        result = whole_period - sum_of_suspend
+        # return float("{0:.2f}".format(result))
+        return result
+
+
+# Functions
+def show_elapsed_time(timestamp_subtraction):
+    hours, rem = divmod(timestamp_subtraction, 3600)
+    minutes, seconds = divmod(rem, 60)
+    return dict(hour=hours, minute=minutes, second=seconds)
+
+
+def show_elapsed_time_tuple(timestamp_subtraction):
+    hours, rem = divmod(timestamp_subtraction, 3600)
+    minutes, seconds = divmod(rem, 60)
+    return hours, minutes, seconds
